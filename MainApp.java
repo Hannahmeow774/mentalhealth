@@ -1,7 +1,8 @@
 public class MainApp {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
-            new StartScreen(); // Launch start screen
+            UserProfile user = new UserProfile("Guest"); // or let user input name later
+            new StartScreen(user);
         });
     }
 }
