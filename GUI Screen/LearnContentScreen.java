@@ -30,7 +30,7 @@ public class LearnContentScreen {
         textArea.setEditable(false);
         textArea.setBackground(new Color(230, 210, 230));
         textArea.setMargin(new Insets(15, 15, 15, 15));
-        textArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        textArea.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         textArea.setForeground(Color.BLACK);
         textArea.setOpaque(true);
 
