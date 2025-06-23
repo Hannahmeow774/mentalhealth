@@ -19,7 +19,7 @@ public class LearnContentScreen {
 
         // Title
         JLabel titleLabel = new JLabel(topic);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
@@ -100,7 +100,7 @@ public class LearnContentScreen {
             if (imageFile.exists()) {
                 ImageIcon originalIcon = new ImageIcon(imagePath);
                 if (originalIcon.getIconWidth() > 0) {
-                    Image resizedImage = originalIcon.getImage().getScaledInstance(250, 150, Image.SCALE_SMOOTH);
+                    Image resizedImage = originalIcon.getImage().getScaledInstance(300,180, Image.SCALE_SMOOTH);
                     ImageIcon resizedIcon = new ImageIcon(resizedImage);
                     return new JLabel(resizedIcon);
                 }
