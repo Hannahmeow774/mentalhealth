@@ -20,7 +20,7 @@ public class StartScreen {
 
         // Create a placeholder for the image if file doesn't exist
         try {
-            ImageIcon icon = new ImageIcon("Resources/mental_health.png");
+            ImageIcon icon = new ImageIcon("../Resources/mental_health.png");
             if (icon.getIconWidth() > 0) {
                 JLabel imageLabel = new JLabel(icon);
                 imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
