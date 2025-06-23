@@ -2,6 +2,7 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 
 public class LearnTopicsScreen {
@@ -9,20 +10,38 @@ public class LearnTopicsScreen {
 
     public LearnTopicsScreen() {
         frame = new JFrame("Mental Health Awareness - Topics");
-        frame.setSize(400, 600);
+        frame.setSize(450, 650);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(200, 162, 200));
 
-        // Panel with GridLayout to avoid scrolling
+        // Title
+        JLabel titleLabel = new JLabel("Choose a Topic to Learn");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+
+        // Panel with GridLayout for topics
         JPanel topicsPanel = new JPanel(new GridLayout(5, 2, 10, 10)); // 5 rows, 2 columns
         topicsPanel.setOpaque(false);
         topicsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // padding
 
-        // Load topics from the file
-        List<String> topics = FileManager.loadTopics("Resources/Resources topics.txt");
+        // Define all 10 topics directly
+        List<String> topics = Arrays.asList(
+            "Introduction to Mental Health",
+            "Common Mental Health Disorders",
+            "Symptoms of Depression and Anxiety",
+            "Myths and Facts About Mental Health",
+            "Coping Mechanisms and Self-care",
+            "The Role of Therapy and Counseling",
+            "Mental Health in Youth and Schools",
+            "Workplace Mental Health Awareness",
+            "Supporting Someone with Mental Health Issues",
+            "Support Networks and Community Resources"
+        );
 
         for (String topic : topics) {
             String displayTopic = topic;
@@ -30,10 +49,16 @@ public class LearnTopicsScreen {
             // Shorten only for display
             if (topic.equals("Supporting Someone with Mental Health Issues")) {
                 displayTopic = "Support for Others";
+            } else if (topic.equals("Support Networks and Community Resources")) {
+                displayTopic = "Support Networks";
+            } else if (topic.equals("Mental Health in Youth and Schools")) {
+                displayTopic = "Youth Mental Health";
+            } else if (topic.equals("Workplace Mental Health Awareness")) {
+                displayTopic = "Workplace Mental Health";
             }
 
             RoundedButton topicButton = new RoundedButton("<html><center>" + displayTopic + "</center></html>");
-            topicButton.setPreferredSize(new Dimension(150, 60));
+            topicButton.setPreferredSize(new Dimension(180, 80));
 
             String actualTopic = topic; // Pass the full name to LearnContentScreen
 
