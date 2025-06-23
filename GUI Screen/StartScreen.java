@@ -18,10 +18,27 @@ public class StartScreen {
 
         mainPanel.add(Box.createVerticalStrut(50));
 
-        ImageIcon icon = new ImageIcon("Resources/mental_health.png");
-        JLabel imageLabel = new JLabel(icon);
-        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(imageLabel);
+        // Create a placeholder for the image if file doesn't exist
+        try {
+            ImageIcon icon = new ImageIcon("Resources/mental_health.png");
+            if (icon.getIconWidth() > 0) {
+                JLabel imageLabel = new JLabel(icon);
+                imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                mainPanel.add(imageLabel);
+            } else {
+                // Fallback if image doesn't exist
+                JLabel imageLabel = new JLabel("🧠");
+                imageLabel.setFont(new Font("Arial", Font.PLAIN, 48));
+                imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                mainPanel.add(imageLabel);
+            }
+        } catch (Exception e) {
+            // Fallback if image doesn't exist
+            JLabel imageLabel = new JLabel("🧠");
+            imageLabel.setFont(new Font("Arial", Font.PLAIN, 48));
+            imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            mainPanel.add(imageLabel);
+        }
 
         mainPanel.add(Box.createVerticalStrut(20));
 
