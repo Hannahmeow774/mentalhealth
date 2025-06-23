@@ -1,106 +1,139 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class TFQuizScreen {
     private JFrame frame;
-    private JLabel questionLabel, timerLabel;
-    private JButton trueButton, falseButton;
-    private QuizModule quizModule;
     private UserProfile user;
-    private int timeLeft = 10; // 10s per question for T/F
-    private Timer timer;
     private boolean timerMode;
+    private int score = 0;
+    private int questionIndex = 0;
+    private String[] questions = {
+            "Mental health affects how we think and feel. (True/False)",
+            "Only teenagers have mental health challenges. (True/False)",
+            "Stress can impact mental health. (True/False)"
+    };
+    private boolean[] answers = {true, false, true};
+    private JLabel questionLabel;
+    private JRadioButton trueButton, falseButton;
+    private ButtonGroup optionsGroup;
+    private JLabel timerLabel;
+    private Timer quizTimer;
+    private int timePerQuestion = 10; // seconds
+    private int timeLeft;
 
-    public TFQuizScreen(UserProfile user, boolean istimerMode) {
+    public TFQuizScreen(UserProfile user, boolean timerMode) {
         this.user = user;
         this.timerMode = timerMode;
-        this.quizModule = new QuizModule();
-        quizModule.loadTFQuestions();
-        createUI();
-        if (timerMode) startTimer();
-    }
 
-    private void createUI() {
         frame = new JFrame("True/False Quiz");
-        frame.setSize(400, 300);
+        frame.setSize(350, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(200, 162, 200));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(200, 162, 200));
 
         questionLabel = new JLabel("", SwingConstants.CENTER);
-        panel.add(questionLabel, BorderLayout.NORTH);
+        questionLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        questionLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.add(questionLabel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel();
-        trueButton = new JButton("True");
-        falseButton = new JButton("False");
+        JPanel optionsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        optionsPanel.setOpaque(false);
+        trueButton = new JRadioButton("True");
+        falseButton = new JRadioButton("False");
+        trueButton.setOpaque(false);
+        falseButton.setOpaque(false);
+        trueButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        falseButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        optionsGroup = new ButtonGroup();
+        optionsGroup.add(trueButton);
+        optionsGroup.add(falseButton);
+        optionsPanel.add(trueButton);
+        optionsPanel.add(falseButton);
 
-        trueButton.addActionListener(e -> submitAnswer("True"));
-        falseButton.addActionListener(e -> submitAnswer("False"));
+        mainPanel.add(optionsPanel, BorderLayout.CENTER);
 
-        buttonPanel.add(trueButton);
-        buttonPanel.add(falseButton);
-        panel.add(buttonPanel, BorderLayout.CENTER);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.setOpaque(false);
 
-        timerLabel = new JLabel("", SwingConstants.CENTER);
-        panel.add(timerLabel, BorderLayout.SOUTH);
+        timerLabel = new JLabel("");
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        bottomPanel.add(timerLabel);
 
-        frame.add(panel);
-        displayNextQuestion();
+        JButton nextButton = new JButton("Next");
+        nextButton.addActionListener(e -> checkAnswer());
+        bottomPanel.add(nextButton);
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
+
+        loadQuestion();
     }
 
-    private void startTimer() {
-        timer = new Timer(1000, e -> {
-            timeLeft--;
-            timerLabel.setText("Time left: " + timeLeft + "s");
-            if (timeLeft <= 0) {
-                timer.stop();
-                submitAnswer(""); // Auto-submit blank
+    private void loadQuestion() {
+        if (questionIndex < questions.length) {
+            questionLabel.setText("Q" + (questionIndex + 1) + ": " + questions[questionIndex]);
+            optionsGroup.clearSelection();
+
+            if (timerMode) {
+                timeLeft = timePerQuestion;
+                timerLabel.setText("Time left: " + timeLeft + "s");
+                if (quizTimer != null) quizTimer.stop();
+                quizTimer = new Timer(1000, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        timeLeft--;
+                        timerLabel.setText("Time left: " + timeLeft + "s");
+                        if (timeLeft <= 0) {
+                            quizTimer.stop();
+                            checkAnswer();
+                        }
+                    }
+                });
+                quizTimer.start();
+            } else {
+                timerLabel.setText("");
             }
-        });
-        timer.start();
-    }
-
-    private void displayNextQuestion() {
-        if (quizModule.hasMoreTFQuestions()) {
-            questionLabel.setText("Q" + (quizModule.getCurrentTFQuestionIndex() + 1) + ": " + quizModule.getCurrentTFQuestion());
-            timeLeft = 10;
-            if (timerMode) timer.restart();
         } else {
             showResult();
         }
     }
 
-    private void submitAnswer(String answer) {
-        quizModule.submitTFAnswer(answer);
-        displayNextQuestion();
+    private void checkAnswer() {
+        if (timerMode && quizTimer != null) quizTimer.stop();
+
+        boolean selectedAnswer = trueButton.isSelected();
+        if (selectedAnswer == answers[questionIndex]) {
+            score += 10;
+        }
+        questionIndex++;
+        loadQuestion();
     }
 
     private void showResult() {
-        int correct = quizModule.getTFCorrectAnswers();
-        int stars = (int) Math.ceil(correct / 2.0); // 10/10 => 5 stars
-        if (stars > 5) stars = 5;
+        String message = "Well done, " + user.getUsername() + "! Your Score: " + score;
+        int stars = score / 10;
 
-        String message;
-        double percent = (correct / 10.0) * 100;
+        String starRating = "Stars: ";
+        for (int i = 0; i < stars; i++) {
+            starRating += "⭐";
+        }
 
-        if (percent >= 80) message = "Outstanding!";
-        else if (percent >= 60) message = "That's good!";
-        else if (percent >= 40) message = "Good try!";
-        else if (percent >= 20) message = "You can do better!";
-        else message = "Don't give up!";
-
-        StringBuilder starDisplay = new StringBuilder();
-        for (int i = 0; i < stars; i++) starDisplay.append("⭐");
+        String motivation;
+        if (score >= 20) {
+            motivation = "Fantastic effort!";
+        } else if (score >= 10) {
+            motivation = "Good try!";
+        } else {
+            motivation = "Keep practicing!";
+        }
 
         JOptionPane.showMessageDialog(frame,
-                "Congratulations, " + user.getUsername() + "!\n" +
-                        "Score: " + correct + "/10\n" +
-                        "Stars: " + starDisplay + "\n" + message);
+                message + "\n" + starRating + "\n" + motivation,
+                "Quiz Result", JOptionPane.INFORMATION_MESSAGE);
 
         frame.dispose();
         new OptionScreen(user);

@@ -4,75 +4,73 @@ import java.io.File;
 
 public class LearnContentScreen {
     JFrame frame;
-    private static final String RESOURCES_PATH = "C:\\Users\\OWNER\\Desktop\\Java jdk\\AppHealth\\src\\";
+    private static final String RESOURCES_PATH = "C:\\Users\\OWNER\\Desktop\\Java jdk\\AppHealth\\src\\"; 
+    private UserProfile user;
 
     public LearnContentScreen(String topic, UserProfile user) {
+        this.user = user;
         frame = new JFrame("Content: " + topic);
-        frame.setSize(500, 700);
+        frame.setSize(350, 500); // STANDARD SIZE
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(new Color(200, 162, 200));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(200, 162, 200)); // Soft purple
 
+        // Title Label (Top)
         JLabel titleLabel = new JLabel(topic, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        mainPanel.add(titleLabel);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Load and add image (beauty section 😍)
-        String imagePath = RESOURCES_PATH + getImageFileForTopic(topic);
-        File imageFile = new File(imagePath);
-        JLabel imageLabel;
-
-        if (imageFile.exists()) {
-            ImageIcon icon = new ImageIcon(imagePath);
-            Image img = icon.getImage().getScaledInstance(300, 180, Image.SCALE_SMOOTH);
-            imageLabel = new JLabel(new ImageIcon(img));
-        } else {
-            imageLabel = new JLabel("No Image Found 😢");
-            imageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        }
-
-        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(imageLabel);
-
-        // Load and add content text
+        // Text Area (Center)
         JTextArea textArea = new JTextArea(getContentForTopic(topic));
         textArea.setWrapStyleWord(true);
         textArea.setLineWrap(true);
         textArea.setEditable(false);
-        textArea.setMargin(new Insets(20, 10, 10, 10));
+        textArea.setMargin(new Insets(5, 5, 5, 5));
         textArea.setBackground(new Color(230, 210, 230));
-        textArea.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
-        textArea.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        textArea.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 13));
 
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(scrollPane);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        scrollPane.setPreferredSize(new Dimension(320, 180)); // fits well in frame
 
-        // Back button
-        JButton backButton = new JButton("Back");
-        styleButton(backButton);
-        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Image Section (Below Text)
+        String imagePath = getImagePathForTopic(topic);
+        JLabel imageLabel = createImageLabel(imagePath);
+        imageLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JPanel imagePanel = new JPanel();
+        imagePanel.setOpaque(false);
+        imagePanel.add(imageLabel);
+
+        mainPanel.add(imagePanel, BorderLayout.SOUTH);
+
+        // Back Button (Bottom)
+        RoundedButton backButton = new RoundedButton("Back");
+        backButton.setPreferredSize(new Dimension(80, 30));
         backButton.addActionListener(e -> {
             frame.dispose();
             new LearnTopicsScreen(user);
         });
 
-        mainPanel.add(Box.createVerticalStrut(10));
-        mainPanel.add(backButton);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.setBackground(new Color(200, 162, 200));
+        bottomPanel.add(backButton);
+
+        mainPanel.add(bottomPanel, BorderLayout.PAGE_END);
 
         frame.add(mainPanel);
         frame.setVisible(true);
     }
 
     private String getContentForTopic(String topic) {
-        String filePath = RESOURCES_PATH + getFileNameForTopic(topic);
+        String filePath = RESOURCES_PATH + "\\" + getFileNameForTopic(topic);
         File file = new File(filePath);
+        System.out.println("Loading content from: " + filePath);
 
         if (file.exists()) {
             try {
@@ -101,29 +99,40 @@ public class LearnContentScreen {
         }
     }
 
-    private String getImageFileForTopic(String topic) {
-        switch (topic) {
-            case "Introduction to Mental Health": return "Intro to MH.jpg";
-            case "Common Mental Health Disorders": return "Common MH.jpg";
-            case "Symptoms of Depression and Anxiety": return "Symptoms of A&D.jpg";
-            case "Myths and Facts About Mental Health": return "Myth & Fact.jpg";
-            case "Coping Mechanisms and Self-care": return "Coping Mechanism.png";
-            case "The Role of Therapy and Counseling": return "Role of therapy.jpg";
-            case "Mental Health in Youth and Schools": return "MH in youth.png";
-            case "Workplace Mental Health Awareness": return "Workplace MH.png";
-            case "Supporting Someone with Mental Health Issues": return "Support with MH.png";
-            case "Support Networks and Community Resources": return "Support Network.png";
-            default: return "fallback.png";
-        }
-    }
-
     private String getDefaultContentForTopic(String topic) {
         return "Content for " + topic + " is not available.";
     }
 
-    private void styleButton(JButton button) {
-        button.setBackground(new Color(153, 102, 204));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
+    private JLabel createImageLabel(String imagePath) {
+        try {
+            File file = new File(imagePath);
+            System.out.println("Trying to load image: " + imagePath);
+            if (file.exists()) {
+                ImageIcon icon = new ImageIcon(imagePath);
+                Image scaled = icon.getImage().getScaledInstance(300, 120, Image.SCALE_SMOOTH); // Scales perfectly into 350x500 frame
+                return new JLabel(new ImageIcon(scaled));
+            } else {
+                System.out.println("Image not found at: " + imagePath);
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading image: " + e.getMessage());
+        }
+        return new JLabel("📚"); // fallback emoji
+    }
+
+    private String getImagePathForTopic(String topic) {
+        switch (topic) {
+            case "Introduction to Mental Health": return RESOURCES_PATH + "\\Intro to MH.jpg";
+            case "Common Mental Health Disorders": return RESOURCES_PATH + "\\Common MH.jpg";
+            case "Symptoms of Depression and Anxiety": return RESOURCES_PATH + "\\Symptoms of A&D.jpg";
+            case "Myths and Facts About Mental Health": return RESOURCES_PATH + "\\Myth & Fact.jpg";
+            case "Coping Mechanisms and Self-care": return RESOURCES_PATH + "\\Coping Mechanism.png";
+            case "The Role of Therapy and Counseling": return RESOURCES_PATH + "\\Role of therapy.jpg";
+            case "Mental Health in Youth and Schools": return RESOURCES_PATH + "\\MH in youth.png";
+            case "Workplace Mental Health Awareness": return RESOURCES_PATH + "\\Workplace MH.png";
+            case "Supporting Someone with Mental Health Issues": return RESOURCES_PATH + "\\Support with MH.png";
+            case "Support Networks and Community Resources": return RESOURCES_PATH + "\\Support Network.png";
+            default: return RESOURCES_PATH + "\\fallback.png";
+        }
     }
 }

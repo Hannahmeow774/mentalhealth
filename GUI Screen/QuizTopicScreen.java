@@ -8,14 +8,14 @@ public class QuizTopicScreen {
     public QuizTopicScreen(UserProfile user) {
         this.user = user;
         frame = new JFrame("Select Quiz Type");
-        frame.setSize(400, 600);
+        frame.setSize(350, 500); // Standardized size
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(200, 162, 200));
+        mainPanel.setBackground(new Color(200, 162, 200)); // Soft purple
 
-        // Center panel for buttons and label
+        // Center panel for label + buttons
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false);
@@ -24,7 +24,7 @@ public class QuizTopicScreen {
         label.setFont(new Font("Arial", Font.BOLD, 18));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // MCQ Normal (Navy Blue)
+        // MCQ Normal Mode (Navy Blue)
         RoundedButton mcqNormal = new RoundedButton("MCQ [Normal Mode]", new Color(0, 0, 128)); // Navy
         mcqNormal.setPreferredSize(new Dimension(250, 50));
         mcqNormal.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -34,7 +34,7 @@ public class QuizTopicScreen {
             new MCQQuizScreen(user, false);
         });
 
-        // MCQ Timer (Navy Blue)
+        // MCQ Timer Mode (Navy Blue)
         RoundedButton mcqTimer = new RoundedButton("MCQ [Timer Mode]", new Color(0, 0, 128)); // Navy
         mcqTimer.setPreferredSize(new Dimension(250, 50));
         mcqTimer.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -44,7 +44,7 @@ public class QuizTopicScreen {
             new MCQQuizScreen(user, true);
         });
 
-        // True/False Normal (Watermelon Pink)
+        // True/False Normal Mode (Watermelon Pink)
         RoundedButton tfNormal = new RoundedButton("True/False [Normal Mode]", new Color(252, 108, 133)); // Watermelon Pink
         tfNormal.setPreferredSize(new Dimension(250, 50));
         tfNormal.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -54,7 +54,7 @@ public class QuizTopicScreen {
             new TFQuizScreen(user, false);
         });
 
-        // True/False Timer (Watermelon Pink)
+        // True/False Timer Mode (Watermelon Pink)
         RoundedButton tfTimer = new RoundedButton("True/False [Timer Mode]", new Color(252, 108, 133)); // Watermelon Pink
         tfTimer.setPreferredSize(new Dimension(250, 50));
         tfTimer.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -64,8 +64,8 @@ public class QuizTopicScreen {
             new TFQuizScreen(user, true);
         });
 
-        // Back Button (Bottom Right)
-        RoundedButton backButton = new RoundedButton("Back", new Color(153, 102, 204)); // Soft Purple
+        // Back Button (Bottom Right, Soft Purple)
+        RoundedButton backButton = new RoundedButton("Back", new Color(153, 102, 204)); // Soft purple
         backButton.setPreferredSize(new Dimension(100, 40));
         backButton.addActionListener(e -> {
             frame.dispose();
@@ -76,13 +76,14 @@ public class QuizTopicScreen {
         bottomPanel.setOpaque(false);
         bottomPanel.add(backButton);
 
-        centerPanel.add(Box.createVerticalStrut(20));
+        // Assembling everything
+        centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(label);
-        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(mcqNormal);
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(mcqTimer);
-        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(tfNormal);
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(tfTimer);

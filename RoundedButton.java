@@ -2,22 +2,21 @@ import javax.swing.*;
 import java.awt.*;
 
 public class RoundedButton extends JButton {
-    private Color customColor;
 
-    // 💡 New constructor with color support
-    public RoundedButton(String label, Color color) {
+    // New Constructor: With custom color
+    public RoundedButton(String label, Color bgColor) {
         super(label);
-        this.customColor = color;
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setBorderPainted(false);
+        setBackground(bgColor);
         setForeground(Color.WHITE);
+        setFocusPainted(false);
+        setContentAreaFilled(false);
+        setBorderPainted(false);
         setFont(new Font("Segoe UI", Font.BOLD, 14));
     }
 
-    // 💡 Old constructor for default purple
+    // Old Constructor: Defaults to soft purple (153, 102, 204)
     public RoundedButton(String label) {
-        this(label, new Color(153, 102, 204)); // default soft purple
+        this(label, new Color(153, 102, 204)); // Soft purple as default
     }
 
     @Override
@@ -25,18 +24,15 @@ public class RoundedButton extends JButton {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if (getModel().isArmed()) {
-            g2.setColor(customColor.darker());
-        } else {
-            g2.setColor(customColor);
-        }
+        g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+
         super.paintComponent(g2);
         g2.dispose();
     }
 
     @Override
     protected void paintBorder(Graphics g) {
-        // no border
+        // No border
     }
 }

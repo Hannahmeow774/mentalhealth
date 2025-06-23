@@ -1,157 +1,151 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class MCQQuizScreen {
     private JFrame frame;
     private UserProfile user;
-    private int currentQuestionIndex = 0;
+    private boolean timerMode;
     private int score = 0;
-    private boolean isTimerMode;
-    private Timer timer;
-    private int timeLeft = 15; // 15 seconds per question
-    private JLabel timerLabel;
-    private JLabel questionLabel;
-    private JButton[] optionButtons;
-
+    private int questionIndex = 0;
     private String[] questions = {
-        "What is mindfulness?",
-        "Which is a symptom of anxiety?",
-        "First step in stress management?",
-        "True/False: Mental health is as important as physical health.",
-        "What should you do if someone panics?"
+            "What is Mental Health?",
+            "What is anxiety?",
+            "Who can experience mental health issues?"
     };
-
     private String[][] options = {
-        {"Being present", "Ignoring", "Overthinking", "Sleeping"},
-        {"Joy", "Worry", "Calmness", "Relaxation"},
-        {"Avoid stress", "Ignore stress", "Identify stressors", "Sleep it off"},
-        {"True", "False", "", ""},
-        {"Run away", "Calm them", "Yell", "Panic as well"}
+            {"Physical fitness", "Emotional well-being", "Financial stability", "None of the above"},
+            {"A type of exercise", "A mental state of worry", "A healthy habit", "A disease like cold"},
+            {"Only adults", "Only teenagers", "Anyone regardless of age", "Only elderly"}
     };
+    private int[] answers = {1, 1, 2}; // correct option indexes
+    private JLabel questionLabel;
+    private JRadioButton[] optionButtons;
+    private ButtonGroup optionsGroup;
+    private JLabel timerLabel;
+    private Timer quizTimer;
+    private int timePerQuestion = 15; // seconds
+    private int timeLeft;
 
-    private String[] correctAnswers = {
-        "Being present",
-        "Worry",
-        "Identify stressors",
-        "True",
-        "Calm them"
-    };
-
-    public MCQQuizScreen(UserProfile user, boolean isTimerMode) {
+    public MCQQuizScreen(UserProfile user, boolean timerMode) {
         this.user = user;
-        this.isTimerMode = isTimerMode;
+        this.timerMode = timerMode;
 
         frame = new JFrame("MCQ Quiz");
-        frame.setSize(500, 400);
+        frame.setSize(350, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(200, 162, 200));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(200, 162, 200));
 
         questionLabel = new JLabel("", SwingConstants.CENTER);
         questionLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        panel.add(questionLabel, BorderLayout.NORTH);
+        questionLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.add(questionLabel, BorderLayout.NORTH);
 
-        JPanel optionsPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        optionButtons = new JButton[4];
+        JPanel optionsPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        optionsPanel.setOpaque(false);
+        optionButtons = new JRadioButton[4];
+        optionsGroup = new ButtonGroup();
 
         for (int i = 0; i < 4; i++) {
-            optionButtons[i] = new JButton();
-            optionButtons[i].setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            optionButtons[i].addActionListener(new OptionButtonListener());
+            optionButtons[i] = new JRadioButton();
+            optionButtons[i].setOpaque(false);
+            optionButtons[i].setFont(new Font("Arial", Font.PLAIN, 14));
+            optionsGroup.add(optionButtons[i]);
             optionsPanel.add(optionButtons[i]);
         }
 
-        panel.add(optionsPanel, BorderLayout.CENTER);
+        mainPanel.add(optionsPanel, BorderLayout.CENTER);
 
-        timerLabel = new JLabel("", SwingConstants.CENTER);
-        timerLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        panel.add(timerLabel, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.setOpaque(false);
 
-        frame.add(panel);
-        displayQuestion();
+        timerLabel = new JLabel("");
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        bottomPanel.add(timerLabel);
+
+        JButton nextButton = new JButton("Next");
+        nextButton.addActionListener(e -> checkAnswer());
+        bottomPanel.add(nextButton);
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
+
+        loadQuestion();
     }
 
-    private void displayQuestion() {
-        if (currentQuestionIndex < questions.length) {
-            questionLabel.setText("Q" + (currentQuestionIndex + 1) + ": " + questions[currentQuestionIndex]);
-
+    private void loadQuestion() {
+        if (questionIndex < questions.length) {
+            questionLabel.setText("Q" + (questionIndex + 1) + ": " + questions[questionIndex]);
             for (int i = 0; i < 4; i++) {
-                if (!options[currentQuestionIndex][i].isEmpty()) {
-                    optionButtons[i].setText(options[currentQuestionIndex][i]);
-                    optionButtons[i].setVisible(true);
-                } else {
-                    optionButtons[i].setVisible(false);
-                }
+                optionButtons[i].setText(options[questionIndex][i]);
             }
+            optionsGroup.clearSelection();
 
-            if (isTimerMode) {
-                timeLeft = 15;
-                timerLabel.setText("Time Left: " + timeLeft + "s");
-
-                timer = new Timer(1000, e -> {
-                    timeLeft--;
-                    timerLabel.setText("Time Left: " + timeLeft + "s");
-                    if (timeLeft <= 0) {
-                        timer.stop();
-                        processAnswer(""); // Time's up, empty answer
+            if (timerMode) {
+                timeLeft = timePerQuestion;
+                timerLabel.setText("Time left: " + timeLeft + "s");
+                if (quizTimer != null) quizTimer.stop();
+                quizTimer = new Timer(1000, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        timeLeft--;
+                        timerLabel.setText("Time left: " + timeLeft + "s");
+                        if (timeLeft <= 0) {
+                            quizTimer.stop();
+                            checkAnswer();
+                        }
                     }
                 });
-                timer.start();
+                quizTimer.start();
             } else {
-                timerLabel.setText(""); // No timer text
+                timerLabel.setText("");
             }
-
         } else {
             showResult();
         }
     }
 
-    private void processAnswer(String answer) {
-        if (timer != null) timer.stop();
+    private void checkAnswer() {
+        if (timerMode && quizTimer != null) quizTimer.stop();
 
-        if (answer.equals(correctAnswers[currentQuestionIndex])) {
-            score += 20; // Example: 20 points per correct
+        for (int i = 0; i < 4; i++) {
+            if (optionButtons[i].isSelected()) {
+                if (i == answers[questionIndex]) {
+                    score += 10;
+                }
+            }
         }
-
-        currentQuestionIndex++;
-        displayQuestion();
+        questionIndex++;
+        loadQuestion();
     }
 
     private void showResult() {
-        int stars = 0;
-        String message = "";
+        String message = "Well done, " + user.getUsername() + "! Your Score: " + score;
+        int stars = score / 10;
 
-        int percent = (score * 100) / (questions.length * 20);
+        String starRating = "Stars: ";
+        for (int i = 0; i < stars; i++) {
+            starRating += "⭐";
+        }
 
-        if (percent >= 80) { message = "Outstanding!"; stars = 5; }
-        else if (percent >= 60) { message = "That's good!"; stars = 4; }
-        else if (percent >= 40) { message = "Good try!"; stars = 3; }
-        else if (percent >= 20) { message = "You can do better!"; stars = 2; }
-        else { message = "Don't give up!"; stars = 1; }
-
-        StringBuilder starDisplay = new StringBuilder();
-        for (int i = 0; i < stars; i++) starDisplay.append("⭐");
+        String motivation;
+        if (score >= 30) {
+            motivation = "Excellent work!";
+        } else if (score >= 20) {
+            motivation = "Good job!";
+        } else {
+            motivation = "Keep learning!";
+        }
 
         JOptionPane.showMessageDialog(frame,
-                user.getUsername() + ", Congratulations!\n" +
-                "Score: " + score + " / " + (questions.length * 20) + "\n" +
-                "You received: " + starDisplay + "\n" + message);
+                message + "\n" + starRating + "\n" + motivation,
+                "Quiz Result", JOptionPane.INFORMATION_MESSAGE);
 
         frame.dispose();
         new OptionScreen(user);
-    }
-
-    private class OptionButtonListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (timer != null) timer.stop();
-            JButton clickedButton = (JButton) e.getSource();
-            processAnswer(clickedButton.getText());
-        }
     }
 }
